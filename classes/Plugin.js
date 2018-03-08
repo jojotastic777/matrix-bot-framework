@@ -8,8 +8,12 @@ class Plugin {
     return new this.prototype.constructor(args.name, args.load);
   }
 
+  get config () {
+    return require("../config.json")[this.name]
+  }
+
   load (bot) {
-    return this._load(bot);
+    return this._load(this, bot);
   }
 }
 

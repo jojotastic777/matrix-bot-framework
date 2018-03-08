@@ -5,17 +5,22 @@ const Context  = require("../classes/Context.js");
 const MatrixBot = require("matrix-js-basic-bot");
 const md = require("markdown-it")();
 
-module.exports = new Plugin ("matrix", (bot)=>{
+module.exports = new Plugin ("protocol-matrix", (plugin,bot)=>{
   bot.registerProtocol(Protocol.constructFromObject({
     name: "matrix",
-    init: function (self, _bot, credentials) {
-      self._matrix = new MatrixBot(credentials.username, credentials.password, credentials.homeserver, "./localstorage-"+_bot.name+"-"+self.name);
+    init: function (self, _bot) {
+      self._matrix = new MatrixBot(
+        plugin.config.credentials.username,
+        plugin.config.credentials.password,
+        plugin.config.credentials.homeserver,
+        "./localstorage-"+_bot.name+"-"+self.name
+      );
       //console.log(self._matirx);
       self._matrix.on('message', (a,b)=>self.onMessage(self,_bot,a,b));
       self._matrix.start();
     },
     send: function (self, msg, room) {
-      self._matrix.sendNotice(room, msg, md.render(msg))
+      self._matrix.sendMessage(room, msg, md.render(msg))
     },
     context: function (self, raw) {
       return new Context(self.name, raw.userId, raw.roomId)

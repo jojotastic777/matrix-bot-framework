@@ -15,6 +15,19 @@ class Bot {
     this.messageProcessors = [];
     this.command_prefix = "!"
     this.invalid_command_message = `"$CMD" is not a valid command. Run "!commands" for a list of commands.`
+
+    if (process.platform === "win32") {
+      var rl = require("readline").createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+    
+      rl.on("SIGINT", function () {
+        process.emit("SIGINT");
+      });
+    }
+    
+    process.on("SIGINT",()=>this.gracefulExit());
   }
 
   registerPlugin (plugin) {
@@ -95,15 +108,6 @@ class Bot {
     this.command_prefix = prefix;
   }
 
-  /*initMatrix (username, password, home_server) {
-    this._matrix = new MatrixBot(username, password, home_server, "./localstorage-"+this.name);
-    this._matrix.on('message', (a,b)=>this.onMessage(a,b));
-  }*/
-
-  /*async startMatrix () {
-    await this._matrix.start();
-  }*/
-
   send (msg, roomId) {
     //this._matrix.sendNotice(roomId, msg, md.render(msg))
     for (let protocol of Object.keys(this.protocols).map(a=>this.protocols[a])) {
@@ -111,20 +115,17 @@ class Bot {
     }
   }
 
-  /*onMessage (content, sender) {
-    let context = Context.fromMatrixSender(sender);
-    if (typeof this.override_onMessage == "function") {
-      return this.override_onMessage(content, sender)
-    } else if (content.body.slice(0,this.command_prefix.length) == this.command_prefix) {
-      let cmd_raw = content.body.slice(this.command_prefix.length)
-      let cmd_raw_array = cmd_raw.split(" ");
-      let cmd_name = cmd_raw_array[0];
-      let args = cmd_raw_array.slice(1);
-      if (this.execCommandIfExists(cmd_name, context, args) === -1) {
-        this.send(this.invalid_command_message.replace(/\$CMD/g, cmd_name), context.room);
+  gracefulExit () {
+    console.log();
+    for (let func of this.cleanup) {
+      try {
+        func(this);
+      } catch (e) {
+        console.log(e);
       }
     }
-  }*/
+    process.exit();
+  }
 }
 
 module.exports = Bot;

@@ -1,0 +1,12 @@
+{
+  "protocol-matrix":{
+    "credentials":{
+      "username":"generic-test-bot",
+      "password":"generic-test-bot",
+      "homeserver":"https://jojotastic777-2.ddns.net"
+    }
+  },
+  "logging":{
+    "log_dir":"log"
+  }
+}
