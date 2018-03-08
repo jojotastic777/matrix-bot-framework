@@ -1,0 +1,12 @@
+{
+  "protocol-matrix":{
+    "credentials":{
+      "username":"bot-username",
+      "password":"bot-pass",
+      "homeserver":"https://matrix.org"
+    }
+  },
+  "logging":{
+    "log_dir":"log"
+  }
+}

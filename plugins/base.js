@@ -1,7 +1,7 @@
 const Plugin = require("../classes/Plugin.js");
 const Command = require("../classes/Command.js");
 
-module.exports = new Plugin ("std_cmds", (bot)=>{
+module.exports = new Plugin ("base", (plugin, bot)=>{
   bot.registerCommand(new Command("plugins", (b, context, args)=>{
     b.send(Object.keys(b.plugins).join(", "), context.room)
   }))

@@ -4,10 +4,6 @@ class Context {
     this.caller = caller;
     this.room = room;
   }
-  
-  static fromMatrixSender (sender) {
-    return new this.prototype.constructor(sender.userId, sender.roomId);
-  }
 }
 
 module.exports = Context;

@@ -1,7 +1,7 @@
 const Plugin = require("../classes/Plugin.js");
 const Command = require("../classes/Command.js");
 
-module.exports = new Plugin ("ping", (bot)=>{
+module.exports = new Plugin ("ping", (plugin, bot)=>{
   bot.registerCommand(new Command("ping", (b, context, args)=>{
     b.send("Pong.", context.room)
   }))
