@@ -1,5 +1,6 @@
 class Context {
-  constructor (caller, room) {
+  constructor (protocol, caller, room) {
+    this.protocol = protocol;
     this.caller = caller;
     this.room = room;
   }

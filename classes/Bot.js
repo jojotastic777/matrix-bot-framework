@@ -9,8 +9,11 @@ class Bot {
     this.plugins = {}
     pluginsGen(this);
     this.commands = {};
+    this.protocols = {};
+    this.protocolsCache = {};
+    this.cleanup = [];
+    this.messageProcessors = [];
     this.command_prefix = "!"
-    this._matrix = null;
     this.invalid_command_message = `"$CMD" is not a valid command. Run "!commands" for a list of commands.`
   }
 
@@ -19,9 +22,31 @@ class Bot {
     this.plugins[plugin.name] = plugin;
   }
 
+  registerCleanup (cleanup) {
+    console.log("Registering Cleanup Function");
+    this.cleanup.push(cleanup);
+  }
+
   registerCommand (command) {
     console.log("Registering Command \""+command.name+"\"")
     this.commands[command.name] = command;
+  }
+
+  registerProtocol (protocol) {
+    console.log(`Registering Protocol "${protocol.name}"`)
+    this.protocols[protocol.name] = protocol;
+    this.protocolsCache[protocol.name] = this.protocolsCache[protocol.name] == undefined ? {} : this.protocolsCache[protocol.name];
+  }
+
+  registerMessageProcessor (messageProcessor) {
+    console.log(`Registering Message Processor`);
+    this.messageProcessors.push(messageProcessor);
+  }
+
+  loadProtocol (protocol_name, credentials) {
+    console.log(`Loading Protocol "${protocol_name}"`)
+    this.protocolsCache[protocol_name].credentials = credentials;
+    this.protocols[protocol_name].init(this, credentials);
   }
 
   loadPlugin (plugin_name) {
@@ -37,10 +62,20 @@ class Bot {
 
   reloadPlugins () {
     console.log("Plugin Reload Initiated.")
+    for (let func of this.cleanup) {
+      func(this);
+    }
     this.plugins = {};
-    this._pluginsGen(this);
     this.commands = {};
+    this.protocols = {};
+    this.cleanup = [];
+    this.messageProcessors = [];
+    this._pluginsGen(this);
     this.loadPlugins();
+    console.log(this.protocolsCache);
+    for (let protocol of Object.keys(this.protocols).map(a=>this.protocols[a])) {
+      protocol.init(this, this.protocolsCache[protocol.name].credentials);
+    }
     console.log("Plugin Reload Complete.")
   }
 
@@ -60,20 +95,23 @@ class Bot {
     this.command_prefix = prefix;
   }
 
-  initMatrix (username, password, home_server) {
+  /*initMatrix (username, password, home_server) {
     this._matrix = new MatrixBot(username, password, home_server, "./localstorage-"+this.name);
     this._matrix.on('message', (a,b)=>this.onMessage(a,b));
-  }
+  }*/
 
-  async startMatrix () {
+  /*async startMatrix () {
     await this._matrix.start();
-  }
+  }*/
 
   send (msg, roomId) {
-    this._matrix.sendNotice(roomId, msg, md.render(msg))
+    //this._matrix.sendNotice(roomId, msg, md.render(msg))
+    for (let protocol of Object.keys(this.protocols).map(a=>this.protocols[a])) {
+      protocol.send(msg, roomId)
+    }
   }
 
-  onMessage (content, sender) {
+  /*onMessage (content, sender) {
     let context = Context.fromMatrixSender(sender);
     if (typeof this.override_onMessage == "function") {
       return this.override_onMessage(content, sender)
@@ -86,7 +124,7 @@ class Bot {
         this.send(this.invalid_command_message.replace(/\$CMD/g, cmd_name), context.room);
       }
     }
-  }
+  }*/
 }
 
 module.exports = Bot;

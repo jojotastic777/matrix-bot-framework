@@ -4,6 +4,10 @@ class Command {
     this._exec = exec;
   }
 
+  static constructFromObject (args) {
+    return new this.prototype.constructor(args.name, args.exec);
+  }
+
   exec (bot_this, context, args) {
     return this._exec(bot_this, context, args);
   }
