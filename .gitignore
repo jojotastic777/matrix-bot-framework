@@ -2,3 +2,4 @@ node_modules
 localstorage
 localstorage*
 log
+config.json
